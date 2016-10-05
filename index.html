@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Vue 2 Test</title>
+    <style media="screen">
+      html, body {
+        font-family: sans-serif;
+      }
+      table tr td {
+        height: 30px;
+        width: 30px;
+        border: 1px solid #ccc;
+        font-weight: lighter;
+        text-align: center;
+      }
+    </style>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.1/vue.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.3/lodash.min.js"></script>
+  </head>
+  <body>
+
+    <div id="app">
+      <a-star inline-template>
+        <div>
+          <table>
+            <tbody>
+              <tr v-for="cols in grid">
+                <td v-for="node in cols">
+                  {{ flagged(node) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </a-star>
+    </div>
+
+    <script type="text/javascript">
+      Vue.component('a-star', {
+        data: function() {
+          var start = { x: 5, y: 5 };
+
+          var grid = [];
+          for (var i = 0; i < 10; i++) {
+            var row = [];
+            for (var j = 0; j < 30; j++) {
+              row.push({
+                x: j,
+                y: i,
+                walkable: true
+              });
+            }
+            grid.push(row);
+          }
+
+          return {
+            grid: grid,
+            start: start,
+            finish: { x: 25, y: 5 },
+            open: [start],
+            closed: []
+          }
+        },
+        methods: {
+          flagged: function(node) {
+            if (node.x == this.start.x && node.y == this.start.y) {
+              return 'S';
+            }
+
+            if (node.x == this.finish.x && node.y == this.finish.y) {
+              return 'F';
+            }
+          },
+          findAdjacentNodes: function(node) {
+          },
+          step: function() {
+
+          }
+        }
+      });
+      new Vue({ el: '#app' });
+    </script>
+  </body>
+</html>
