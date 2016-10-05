@@ -26,7 +26,7 @@
           <table>
             <tbody>
               <tr v-for="cols in grid">
-                <td v-for="node in cols">
+                <td v-for="node in cols" v-on:click="findAdjacentNodes(node)">
                   {{ flagged(node) }}
                 </td>
               </tr>
@@ -56,6 +56,7 @@
 
           return {
             grid: grid,
+            nodes: _.flatten(grid),
             start: start,
             finish: { x: 25, y: 5 },
             open: [start],
@@ -73,6 +74,8 @@
             }
           },
           findAdjacentNodes: function(node) {
+            var leftNode = _.find(this.nodes, { x: node.x - 1, y: node.y });
+            console.log(leftNode);
           },
           step: function() {
 
