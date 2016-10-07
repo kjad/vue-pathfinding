@@ -23,6 +23,9 @@
       .wall {
         background-color: #ccc;
       }
+      .route {
+        background-color: #f34c9f;
+      }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" />
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.1/vue.js"></script>
@@ -36,7 +39,7 @@
           <table>
             <tbody>
               <tr v-for="cols in grid">
-                <td v-for="node in cols" :class="{ frontier: node.frontier, visited: node.visited, wall: node.wall }" v-html="flagged(node)">
+                <td v-for="node in cols" :class="{ frontier: node.frontier, visited: node.visited, wall: node.wall, route: node.route }" v-html="flagged(node)">
                 </td>
               </tr>
             </tbody>
@@ -75,6 +78,10 @@
             { x: 24, y: 4 },
             { x: 24, y: 5 },
             { x: 24, y: 6 },
+            { x: 14, y: 0 },
+            { x: 14, y: 1 },
+            { x: 14, y: 2 },
+            { x: 14, y: 3 },
           ];
 
           var grid = [];
@@ -101,7 +108,8 @@
             finish: finish,
             open: [start],
             closed: [],
-            solved: false
+            solved: false,
+            route: false
           }
         },
         methods: {
@@ -170,6 +178,15 @@
               this.step();
             }
           },
+          tracePath: function() {
+            var finish = this.grid[this.finish.y][this.finish.x];
+            var node = finish.from;
+            do {
+              node.route = true;
+              node = node.from;
+            } while (node)
+
+          },
           step: function() {
             if (this.solved) {
               return;
@@ -184,6 +201,7 @@
 
             if (node.x == this.finish.x && node.y == this.finish.y) {
               this.solved = true;
+              this.tracePath();
               return;
             }
 
