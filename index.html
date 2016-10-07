@@ -14,7 +14,17 @@
         font-weight: lighter;
         text-align: center;
       }
+      .frontier {
+        background-color: #e2b7b7;
+      }
+      .visited {
+        background-color: #87b0dc;
+      }
+      .wall {
+        background-color: #ccc;
+      }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" />
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.1/vue.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.3/lodash.min.js"></script>
   </head>
@@ -26,12 +36,16 @@
           <table>
             <tbody>
               <tr v-for="cols in grid">
-                <td v-for="node in cols" v-on:click="findAdjacentNodes(node)">
-                  {{ flagged(node) }}
+                <td v-for="node in cols" :class="{ frontier: node.frontier, visited: node.visited, wall: node.wall }" v-html="flagged(node)">
                 </td>
               </tr>
             </tbody>
           </table>
+          <div v-show="!solved">
+            <button type="button" name="button" v-on:click="steps(1)">Search x1</button>
+            <button type="button" name="button" v-on:click="steps(10)">Search x10</button>
+            <button type="button" name="button" v-on:click="steps(100)">Search x100</button>
+          </div>
         </div>
       </a-star>
     </div>
@@ -40,15 +54,41 @@
       Vue.component('a-star', {
         data: function() {
           var start = { x: 5, y: 5 };
+          var finish = { x: 25, y: 5 };
+          var walls = [
+            { x: 7, y: 1 },
+            { x: 7, y: 2 },
+            { x: 7, y: 3 },
+            { x: 7, y: 4 },
+            { x: 7, y: 5 },
+            { x: 7, y: 6 },
+            { x: 7, y: 7 },
+            { x: 7, y: 8 },
+            { x: 10, y: 5 },
+            { x: 11, y: 5 },
+            { x: 12, y: 5 },
+            { x: 13, y: 5 },
+            { x: 13, y: 6 },
+            { x: 13, y: 7 },
+            { x: 13, y: 8 },
+            { x: 13, y: 9 },
+            { x: 24, y: 4 },
+            { x: 24, y: 5 },
+            { x: 24, y: 6 },
+          ];
 
           var grid = [];
           for (var i = 0; i < 10; i++) {
             var row = [];
             for (var j = 0; j < 30; j++) {
+              var wall = (_.find(walls, { x: j, y: i }));
               row.push({
                 x: j,
                 y: i,
-                walkable: true
+                visited: false,
+                frontier: false,
+                from: null,
+                wall: wall
               });
             }
             grid.push(row);
@@ -58,9 +98,10 @@
             grid: grid,
             nodes: _.flatten(grid),
             start: start,
-            finish: { x: 25, y: 5 },
+            finish: finish,
             open: [start],
-            closed: []
+            closed: [],
+            solved: false
           }
         },
         methods: {
@@ -72,17 +113,102 @@
             if (node.x == this.finish.x && node.y == this.finish.y) {
               return 'F';
             }
+
+            if (node.visited) {
+              // return 'v';
+            }
+
+            if (node.frontier) {
+              // return 'f';
+            }
+
+            if (node.wall) {
+              // return 'W';
+            }
+
+            if (node.from) {
+              var icon = "";
+              if (node.from.x > node.x) {
+                icon = 'fa-arrow-right';
+              } else if (node.from.x < node.x) {
+                icon = 'fa-arrow-left';
+              } else if (node.from.y > node.y) {
+                icon = 'fa-arrow-down';
+              } else {
+                icon = 'fa-arrow-up';
+              }
+              return '<i class="fa ' + icon + '"</i>';
+            }
           },
           findAdjacentNodes: function(node) {
+            var adj = [];
+
             var leftNode = _.find(this.nodes, { x: node.x - 1, y: node.y });
-            console.log(leftNode);
+            if (leftNode && !leftNode.wall) {
+              adj.push(leftNode);
+            }
+
+            var rightNode = _.find(this.nodes, { x: node.x + 1, y: node.y });
+            if (rightNode && !rightNode.wall) {
+              adj.push(rightNode);
+            }
+
+            var topNode = _.find(this.nodes, { x: node.x, y: node.y - 1 });
+            if (topNode && !topNode.wall) {
+              adj.push(topNode);
+            }
+
+            var bottomNode = _.find(this.nodes, { x: node.x, y: node.y + 1 });
+            if (bottomNode && !bottomNode.wall) {
+              adj.push(bottomNode);
+            }
+
+            return adj;
+          },
+          steps: function(iterations) {
+            for (var i = 0; i < iterations; i++) {
+              this.step();
+            }
           },
           step: function() {
+            if (this.solved) {
+              return;
+            }
 
+            var node = this.open.shift();
+
+            if (!node) {
+              //end here...
+              alert("End of the search :(");
+            }
+
+            if (node.x == this.finish.x && node.y == this.finish.y) {
+              this.solved = true;
+              return;
+            }
+
+            node.frontier = false;
+            node.visited = true;
+            this.closed.push(node);
+
+            var vm = this;
+            var adjs = this.findAdjacentNodes(node);
+
+            adjs.forEach(function(n) {
+              if (!_.find(vm.closed, { x: n.x, y: n.y }) && !_.find(vm.open, { x: n.x, y: n.y })) {
+                n.frontier = true;
+                n.from = node;
+                vm.open.push(n);
+              }
+            });
+
+            // console.log('shifted off:', node.x, node.y, 'open len:', this.open.length, 'closed len:', this.closed.length, 'adjs:', adjs.map(a => a.x.toString() + ',' + a.y.toString()));
           }
         }
       });
+
       new Vue({ el: '#app' });
+
     </script>
   </body>
 </html>
