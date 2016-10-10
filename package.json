@@ -1,0 +1,36 @@
+{
+  "name": "vue-pathfinding",
+  "version": "1.0.0",
+  "description": "A simple demonstration of the A* pathfinding algorithm, using VueJS to visualize it.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack-dev-server --progress --colors --hot",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kjad/vue-pathfinding.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kjad/vue-pathfinding/issues"
+  },
+  "homepage": "https://github.com/kjad/vue-pathfinding#readme",
+  "devDependencies": {
+    "buble": "^0.14.0",
+    "buble-loader": "^0.3.0",
+    "css-loader": "^0.25.0",
+    "style-loader": "^0.13.1",
+    "vue-loader": "^9.5.1",
+    "webpack": "^1.13.2",
+    "webpack-dev-server": "^1.16.2"
+  },
+  "dependencies": {
+    "js-priority-queue": "^0.1.5",
+    "lodash": "^4.16.4",
+    "path": "^0.12.7",
+    "vue": "^2.0.1"
+  }
+}
